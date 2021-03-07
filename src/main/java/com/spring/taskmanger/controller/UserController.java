@@ -4,8 +4,12 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.spring.taskmanger.dao.TokenRepository;
+import com.spring.taskmanger.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,36 +28,37 @@ public class UserController {
 	@Autowired
 	UserService userService;
 
+	@Autowired
+	TokenRepository tokenRepository;
+
 	@GetMapping("/users")
-	public List<User> getAllUsers() {
-
-		return userService.getAllUsers();
-	}
-
-	@GetMapping("/users/{id}")
 	// ResponseEntity represents the whole HTTP response: status code, headers, and
 	// body, Used in RestTemplate as well @Controller methods.
-	public ResponseEntity<User> getUser(@PathVariable Long id) {
+	public ResponseEntity<User> getUser() {
+		return userService.getUser();
+	}
 
-		return userService.getUser(id);
+	@PutMapping("/users")
+	public ResponseEntity<User> UpdateUser(@Valid @RequestBody User user) {
+		return userService.updateUser(user);
+
+	}
+
+	/*
+	@GetMapping("/users")
+	public List<User> getAllUsers() {
+		return userService.getAllUsers();
 	}
 
 	@PostMapping("/users")
 	public User addUser(@Valid @RequestBody User user) {
 		return userService.addUser(user);
-
 	}
 
 	@DeleteMapping("/users/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable Long id) {
 		return userService.deleteUser(id);
-
 	}
-
-	@PutMapping("/users/{id}")
-	public ResponseEntity<User> UpdateUser(@Valid @RequestBody User user, @PathVariable Long id) {
-		return userService.updateUser(id, user);
-
-	}
+	 */
 
 }

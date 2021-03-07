@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.spring.taskmanger.controller.TaskController;
@@ -32,16 +35,16 @@ public class TaskService {
 	@Autowired
 	UserRepository userRepository;
 
-	public ResponseEntity<Page<Task>> getAllTasks(Long userId, Pageable pageable) throws ResourceNotFoundException {
+	public ResponseEntity<Page<Task>> getAllTasks(Pageable pageable) throws ResourceNotFoundException {
 
-		Page<Task> tasks = taskRepository.findByUserId(userId, pageable);
+		Page<Task> tasks = taskRepository.findByUserId(getCurrentUserID(), pageable);
 
 		if (tasks.isEmpty()) {
-			logger.error("There is an Error of getting user of id " + userId);
-			throw new ResourceNotFoundException("UserId " + userId + " not Exist");
+			logger.error("There is an Error of getting user of id " + getCurrentUserID());
+			throw new ResourceNotFoundException("No Tasks found for this user");
 		}
 
-		logger.info("getting all the task of user id  " + userId + "is successed");
+		logger.info("getting all the task of user id  " + getCurrentUserID() + "is successed");
 
 		return ResponseEntity.ok().body(tasks);
 
@@ -52,18 +55,19 @@ public class TaskService {
 
 	}
 
-	public ResponseEntity<Task> addTask(Task task, Long userId) throws ResourceNotFoundException {
+	public ResponseEntity<?> addTask(Task task) throws ResourceNotFoundException {
 
-		if (!userRepository.existsById(userId)) {
+		if (!userRepository.existsById(getCurrentUserID ())) {
 			logger.error("There is an Error of adding a new task,The given ID is not found ");
 
-			throw new ResourceNotFoundException("UserId " + userId + " not found");
+			throw new ResourceNotFoundException("UserId " + getCurrentUserID () + " not found");
 		}
 
-		User user = userRepository.findById(userId).get();
+		User user = userRepository.findById(getCurrentUserID ()).get();
 		task.setUser(user);
-		logger.info("New Task was saved successfully to User with Id" + userId);
-		return ResponseEntity.ok().body(taskRepository.save(task));
+		logger.info("New Task was saved successfully to User with Id" + getCurrentUserID ());
+		Task task1 = taskRepository.save(task);
+		return ResponseEntity.ok().body("New Task was saved successfully" + task1);
 
 		/*
 		 * userRepository.findById(userId).map(user -> { task.setUser(user); return
@@ -72,43 +76,55 @@ public class TaskService {
 		 */
 	}
 
-	public ResponseEntity<Task> getTask(Long userId, Long taskId) {
+	public ResponseEntity<Task> getTask(Long taskId) {
 
-		Optional<Task> optional = taskRepository.findByIdAndUserId(taskId, userId);
+		Optional<Task> optional = taskRepository.findByIdAndUserId(taskId, getCurrentUserID ());
 		if (!(optional.isPresent())) {
 			logger.error("Error while retriving tasks ");
-
-			throw new ResourceNotFoundException("UserId " + userId + "with TaskId " + taskId + "not found");
-
+			throw new ResourceNotFoundException("UserId " + getCurrentUserID () + "with TaskId " + taskId + "not found");
 		}
-
 		return ResponseEntity.ok().body(optional.get());
-
 	}
 
-	public ResponseEntity<Task> updateTask(Task task1, Long userId, Long taskId) throws ResourceNotFoundException {
-
-		if (!userRepository.existsById(userId)) {
+	public ResponseEntity<Task> updateTask(Task task1, Long taskId) throws ResourceNotFoundException {
+		/*
+		if (!userRepository.existsById(getCurrentUserID ())) {
 			logger.error("Error while Updating tasks ");
-			throw new ResourceNotFoundException("UserId " + userId + " not found");
+			throw new ResourceNotFoundException("UserId " + getCurrentUserID () + " not found");
 		}
+		 */
 
-		return taskRepository.findById(taskId).map(task -> {
+		return taskRepository.findByIdAndUserId(taskId, getCurrentUserID ()).map(task -> {
 			task.setDescription(task1.getDescription());
 			task.setCompleted(task1.isCompleted());
-			task.setUser(task1.getUser());
 			return ResponseEntity.ok().body(taskRepository.save(task));
-		}).orElseThrow(() -> new ResourceNotFoundException("taskId " + taskId + "not found"));
+		}).orElseThrow(() -> new ResourceNotFoundException("taskId " + taskId +"with current User"+ getCurrentUserID () + "not found"));
 
 	}
 
-	public ResponseEntity<?> deleteTask(Long userId, Long taskId) throws ResourceNotFoundException {
+	public ResponseEntity<?> deleteTask(Long taskId) throws ResourceNotFoundException {
 
-		return taskRepository.findByIdAndUserId(taskId, userId).map(task -> {
+		return taskRepository.findByIdAndUserId(taskId, getCurrentUserID ()).map(task -> {
 			taskRepository.delete(task);
-			return ResponseEntity.ok().build();
+			return ResponseEntity.ok().body("Task Succefully Deleted !");
 		}).orElseThrow(
-				() -> new ResourceNotFoundException("Task not found with taaskId " + taskId + " and userId " + userId));
+				() -> new ResourceNotFoundException("Task not found with taaskId " + taskId + " and userId " + getCurrentUserID ()));
+	}
+
+	private Long getCurrentUserID () {
+		UserDetails userDetails =
+				(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String currentUserName = userDetails.getUsername();
+		Optional<User> user = userRepository.findByEmail(currentUserName);
+		Long userId = user.get().getId();
+		return userId;
+
+		/*
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String currentPrincipalName = authentication.getName();
+		Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+		Long userId = user.get().getId();
+		 */
 	}
 
 }
