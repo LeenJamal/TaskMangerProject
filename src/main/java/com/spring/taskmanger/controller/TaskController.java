@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,40 +29,38 @@ import com.spring.taskmanger.service.TaskService;
 import com.spring.taskmanger.service.UserService;
 
 @RestController
-
 public class TaskController {
 
 	@Autowired
 	TaskService taskService;
 
-	@GetMapping("/users/{userId}/tasks")
-	public ResponseEntity<Page<Task>> getAllTasks(@PathVariable Long userId, Pageable pageable) {
+	@GetMapping("/users/tasks")
+	public ResponseEntity<Page<Task>> getAllTasks( Pageable pageable) {
 
-		return taskService.getAllTasks(userId, pageable);
+		return taskService.getAllTasks(pageable);
 	}
 
-	@GetMapping("/users/{userId}/tasks/{taskId}")
-	public ResponseEntity<Task> getTask(@PathVariable Long userId, @PathVariable Long taskId) {
-		return taskService.getTask(userId, taskId);
+	@GetMapping("/users/tasks/{taskId}")
+	public ResponseEntity<Task> getTask( @PathVariable Long taskId) {
+		return taskService.getTask( taskId);
 	}
 
-	@PostMapping("/users/{userId}/tasks")
-	public ResponseEntity<Task> addTask(@Valid @RequestBody Task task, @PathVariable Long userId) {
+	@PostMapping("/users/tasks")
+	public ResponseEntity<?> addTask(@Valid @RequestBody Task task) {
 
-		return taskService.addTask(task, userId);
+		return taskService.addTask(task);
 	}
 
-	@PutMapping("/users/{userId}/tasks/{taskid}")
-	public ResponseEntity<Task> updateTask(@Valid @RequestBody Task task, @PathVariable Long userId,
-			@PathVariable Long taskid) {
+	@PutMapping("/users/tasks/{taskid}")
+	public ResponseEntity<Task> updateTask(@Valid @RequestBody Task task,@PathVariable Long taskid) {
 
-		return taskService.updateTask(task, userId, taskid);
+		return taskService.updateTask(task, taskid);
 	}
 
-	@DeleteMapping("/users/{userId}/tasks/{taskId}")
-	public ResponseEntity<?> deleteTask(@PathVariable Long userId, @PathVariable Long taskId) {
+	@DeleteMapping("/users/tasks/{taskId}")
+	public ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
 
-		return taskService.deleteTask(userId, taskId);
+		return taskService.deleteTask(taskId);
 	}
 
 }
