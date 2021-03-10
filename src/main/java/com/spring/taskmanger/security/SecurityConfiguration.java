@@ -26,10 +26,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     CustomUserDetailsService customUserDetailsService;
-/*
-    @Autowired
-    private AuthTokenFilter jwtRequestFilter;
-*/
+
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
@@ -38,34 +35,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new AuthTokenFilter();
     }
 
-
-
-
-
-/*
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new CustomUserDetailsService();
-    }
-
- */
-
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    /*
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() { // which retrieves the user details from a simple
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
-
-        return authProvider;
-    }
-
-     */
 
     @Bean
     @Override
@@ -73,20 +47,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-
-
-/*
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception { // For Authentication
-        auth.authenticationProvider(authenticationProvider());
-    }
-*/
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
     }
-
-
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -99,9 +63,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS); // telling the spring security don't create sessions
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-
-
-
 
 
 }

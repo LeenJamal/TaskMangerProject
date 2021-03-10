@@ -28,9 +28,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-@CrossOrigin(origins = "*", maxAge = 3600)
 
-//@RequestMapping("/auth")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class AppController {
     @Autowired
@@ -61,7 +60,6 @@ public class AppController {
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtil.generateJwtToken(authentication);
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -73,8 +71,6 @@ public class AppController {
             tokenRepository.save(token);
             logger.info("New Token was saved successfully to User with Id" + userId);
 
-
-            //  System.out.println( userDetails.getId() +""+ userDetails.getUsername()+""+ userDetails.getName());
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),
                     userDetails.getUsername(),
@@ -82,7 +78,6 @@ public class AppController {
                     userDetails.getAge()
                     ));
        }
-
         catch (BadCredentialsException e) {
             throw new Exception("Incorrect username or password", e);
         }
@@ -112,67 +107,25 @@ public class AppController {
     public ResponseEntity<?> logOut() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails customUser = (CustomUserDetails)authentication.getPrincipal();
-        long userId = customUser.getId();
-         User user = userRepository.findById(userId).get();
+         User user = customUser.getUser();
         String token = customUser.getToken();
-        logger.info("userId" +userId + "and token is" + token );
 
+        logger.info("userId" +user.getId() + "and token is" + token );
         tokenRepository.deleteByJwtandUserId(token, user);
 
         return ResponseEntity.ok("You Are Logged Out!");
 
     }
 
-
     @GetMapping("/exitAll")
     public ResponseEntity<?> logOutAll() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails customUser = (CustomUserDetails)authentication.getPrincipal();
-        long userId = customUser.getId();
-        User user = userRepository.findById(userId).get();
+        User user = customUser.getUser();
         tokenRepository.deleteByUserId(user);
 
         return ResponseEntity.ok("You Are Logged Out From All devices !");
 
     }
-
-
-
-
-
-
-
-    /*
-    @GetMapping("")
-    public String login() {
-        return "index"; // return index in the templet file
-    }
-
-    @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("user",new User());
-        return "register_form"; // return index in the templet file
-    }
-
-    @GetMapping("/process_register")
-    public String processRegister(User user) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-
-        userService.addUser(user);
-
-        return "register_success";
-    }
-
-    @GetMapping("/users")
-    public String listUsers(Model model) {
-        List<User> listUsers = Task.findAll();
-        model.addAttribute("listUsers", listUsers);
-
-        return "users";
-    }
-*/
-
 
 }

@@ -23,37 +23,27 @@ public class CustomUserDetails implements UserDetails {
 
     private String token;
 
-    //User user;
+    private User user;
 
-    /*public CustomUserDetails(User user) {
-        this.user = user;
-    }
-
-     */
 
     public CustomUserDetails(Long id, String name, String email, String password,
-                           int age) {
+                           int age, User user) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.age = age;
+        this.user = user;
     }
 
     public static CustomUserDetails build(User user1) {
-        /*
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toList());
-
-         */
-
         return new CustomUserDetails(
                 user1.getId(),
                 user1.getName(),
                 user1.getEmail(),
                 user1.getPassword(),
-                user1.getAge());
+                user1.getAge(),
+                user1);
     }
 
     public Long getId() {
@@ -71,9 +61,14 @@ public class CustomUserDetails implements UserDetails {
     public String getName() {
         return name;
     }
+
     public int getAge() {
         return age;
     }
+
+    public User getUser() { return user; }
+
+    public void setUser(User user) {this.user = user; }
 
     @Override
     public String getPassword() {
@@ -112,7 +107,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) // / If the object is compared with itself then return true
             return true;
         if (o == null || getClass() != o.getClass())
             return false;

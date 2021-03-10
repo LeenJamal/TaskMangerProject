@@ -20,16 +20,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-//@Component
+
 public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtils;
 
     @Autowired
     private CustomUserDetailsService userDetailsService ;
-
-    @Autowired
-    private UserRepository UserRepository;
 
     @Autowired
     private TokenRepository tokenRepository;
@@ -56,6 +53,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+
                 else {
                     throw new Exception();
                 }

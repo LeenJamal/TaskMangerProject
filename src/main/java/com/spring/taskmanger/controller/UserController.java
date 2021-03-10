@@ -44,21 +44,5 @@ public class UserController {
 
 	}
 
-	/*
-	@GetMapping("/users")
-	public List<User> getAllUsers() {
-		return userService.getAllUsers();
-	}
-
-	@PostMapping("/users")
-	public User addUser(@Valid @RequestBody User user) {
-		return userService.addUser(user);
-	}
-
-	@DeleteMapping("/users/{id}")
-	public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-		return userService.deleteUser(id);
-	}
-	 */
 
 }

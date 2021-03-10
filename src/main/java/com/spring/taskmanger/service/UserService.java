@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.spring.taskmanger.security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,11 @@ import com.spring.taskmanger.model.User;
 public class UserService {
 	@Autowired
 	UserRepository userRepository;
+
 	private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
+
+	CustomUserDetails customUserDetails =
+			(CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 	public List<User> getAllUsers() {
 		List<User> users = new ArrayList<>();
@@ -37,11 +42,7 @@ public class UserService {
 	}
 
 	public ResponseEntity<User> getUser( ) throws ResourceNotFoundException {
-		Optional<User> userOptional = userRepository.findById(getCurrentUserID());
-		if (!(userOptional.isPresent())) {
-			logger.error("Resource Not Found Exception While retriving the User");
-			throw new ResourceNotFoundException("User not found with id " + getCurrentUserID());
-		}
+		Optional<User> userOptional = userRepository.findById(customUserDetails.getId());
 		logger.info("User retrived Succefully");
 		return ResponseEntity.ok().body(userOptional.get());
 	}
@@ -57,32 +58,14 @@ public class UserService {
 
 	public ResponseEntity<User> updateUser(User user1) throws ResourceNotFoundException {
 
-		User user = userRepository.findById(getCurrentUserID())
-				.orElseThrow(() -> new ResourceNotFoundException("User not found for this id :: " + getCurrentUserID()));
+		User user = userRepository.findById(customUserDetails.getId()).get();
 
 		user.setName(user1.getName());
 		user.setEmail(user1.getEmail());
 		user.setPassword(user1.getEmail());
 
-		// final User updatedEmployee = userRepository.save(user);
 		return ResponseEntity.ok(userRepository.save(user));
 
-	}
-
-	private Long getCurrentUserID() {
-		UserDetails userDetails =
-				(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String currentUserName = userDetails.getUsername();
-		Optional<User> user = userRepository.findByEmail(currentUserName);
-		Long userId = user.get().getId();
-		return userId;
-
-		/*
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String currentPrincipalName = authentication.getName();
-		Optional<User> user = userRepository.findByEmail(currentPrincipalName);
-		Long userId = user.get().getId();
-		 */
 	}
 
 
