@@ -36,14 +36,14 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    public static CustomUserDetails build(User user1) {
+    public static CustomUserDetails build(User user) {
         return new CustomUserDetails(
-                user1.getId(),
-                user1.getName(),
-                user1.getEmail(),
-                user1.getPassword(),
-                user1.getAge(),
-                user1);
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getAge(),
+                user);
     }
 
     public Long getId() {

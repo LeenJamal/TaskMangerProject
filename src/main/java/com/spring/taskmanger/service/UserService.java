@@ -24,9 +24,6 @@ public class UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
-	CustomUserDetails customUserDetails =
-			(CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
 	public List<User> getAllUsers() {
 		List<User> users = new ArrayList<>();
 		userRepository.findAll().forEach(users::add);
@@ -42,9 +39,9 @@ public class UserService {
 	}
 
 	public ResponseEntity<User> getUser( ) throws ResourceNotFoundException {
-		Optional<User> userOptional = userRepository.findById(customUserDetails.getId());
+		User user = getCurrentUser();
 		logger.info("User retrived Succefully");
-		return ResponseEntity.ok().body(userOptional.get());
+		return ResponseEntity.ok().body(user);
 	}
 
 	public ResponseEntity<?> deleteUser(Long id) {
@@ -58,15 +55,22 @@ public class UserService {
 
 	public ResponseEntity<User> updateUser(User user1) throws ResourceNotFoundException {
 
-		User user = userRepository.findById(customUserDetails.getId()).get();
+		User user = getCurrentUser();
 
 		user.setName(user1.getName());
 		user.setEmail(user1.getEmail());
-		user.setPassword(user1.getEmail());
+		user.setPassword(user1.getPassword());
+		user.setAge(user1.getAge());
 
 		return ResponseEntity.ok(userRepository.save(user));
 
 	}
 
+	private User getCurrentUser() {
+
+		CustomUserDetails customUserDetails =
+				(CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return customUserDetails.getUser();
+	}
 
 }

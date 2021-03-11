@@ -11,7 +11,7 @@ import com.spring.taskmanger.model.Task;
 
 public interface TaskRepository extends CrudRepository<Task, Long> {
 
-	public Page<Task> findByUserId(Long id, Pageable pageable);
+	Page<Task> findByUserId(Long id, Pageable pageable);
 
 	Optional<Task> findByIdAndUserId(Long id, Long userId);
 
