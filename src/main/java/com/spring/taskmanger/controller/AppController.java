@@ -65,11 +65,10 @@ public class AppController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
             // adding the jwt To the data Base
-            long userId = userDetails.getId();
-            User user = userRepository.findById(userId).get();
+            User user = userDetails.getUser();
             Token token = new Token(jwt, user);
             tokenRepository.save(token);
-            logger.info("New Token was saved successfully to User with Id" + userId);
+            logger.info("New Token was saved successfully to User with Id" + user.getId());
 
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),

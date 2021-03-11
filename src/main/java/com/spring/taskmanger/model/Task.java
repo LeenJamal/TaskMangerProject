@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -31,6 +32,7 @@ public class Task {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false) // to declare the foreign key column.
 	@OnDelete(action = OnDeleteAction.CASCADE)
+	@JsonIgnoreProperties(value = {"task", "hibernateLazyInitializer"})
 	private User user;
 
 	public long getId() {
